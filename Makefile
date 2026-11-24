@@ -1,6 +1,7 @@
 sync: deps up-d ## обновляем зависимости в .venv
 
-deps: .venv/bin/python -m pip install -e . ## ставим зависимости
+deps: ## ставим зависимости (не мог достучаться до pypi.org)
+	.venv/bin/python -m pip install --default-timeout=100 -i https://pypi.tuna.tsinghua.edu.cn/simple -e ./api
 
 build: ## сборка образов
 	docker compose build

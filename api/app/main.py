@@ -11,13 +11,28 @@ EVENTS = [
     {"id": 2, "title": "Турнир по шахматам", "club": "Шахматный клуб", "room": "Аудитория 311"}
 ]
 
+CLUBS = [
+    {"id": 1, "name": "IT-клуб", "description": "Клуб спортивного программирования и разработки"},
+    {"id": 2, "name": "Шахматный клуб", "description": "Любители блица и классических шахмат"},
+    {"id": 3, "name": "Киноклуб", "description": "Просмотр и обсуждение классики мирового кино"}
+]
+
+ROOMS = [
+    {"id": 1, "name": "Аудитория 203", "building": "Главный корпус", "capacity": 50},
+    {"id": 2, "name": "Аудитория 311", "building": "Главный корпус", "capacity": 30},
+    {"id": 3, "name": "Аудитория 404", "building": "Главный корпус", "capacity": 30}
+]
+
+
 @app.get("/api/health")
 def health():
     return { "status": "ok" }
 
+
 @app.get("/api/events")
 def list_events():
     return EVENTS
+
 
 @app.get("/api/events/{event_id}")
 def get_event(event_id: int):
@@ -25,3 +40,24 @@ def get_event(event_id: int):
         if event["id"] == event_id:
             return event
     raise HTTPException(status_code=404, detail="Мероприятие не найдено")
+
+
+@app.get("/api/clubs")
+def list_clubs():
+    """Возвращает список всех клубов."""
+    return CLUBS
+
+
+@app.get("/api/clubs/{club_id}")
+def get_club(club_id: int):
+    """Возвращает один клуб по id или 404, если клуб не найден."""
+    for club in CLUBS:
+        if club["id"] == club_id:
+            return club
+    raise HTTPException(status_code=404, detail=f"Клуб с id={club_id} не найден")
+
+
+@app.get("/api/rooms")
+def list_rooms():
+    """Возвращает список аудиторий."""
+    return ROOMS

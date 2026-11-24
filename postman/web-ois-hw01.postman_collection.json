@@ -1,0 +1,196 @@
+{
+  "info": {
+    "name": "WEB-ОИС API (HW-01)",
+    "description": "Автотесты для проверки домашнего задания №1 (Клубы и Аудитории)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Статус системы ok', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql('ok');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "2. Список клубов (GET /api/clubs)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Возвращается минимум 3 клуба', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    pm.expect(jsonData.length).to.be.at.least(3);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/clubs",
+          "host": ["{{base_url}}"],
+          "path": ["api", "clubs"]
+        }
+      }
+    },
+    {
+      "name": "3. Один клуб - существующий (GET /api/clubs/1)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Возвращается клуб с id = 1', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.eql(1);",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/clubs/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "clubs", "1"]
+        }
+      }
+    },
+    {
+      "name": "4. Один клуб - не найден 404 (GET /api/clubs/999)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 404 Not Found', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test('Ответ содержит осмысленный detail', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('detail');",
+              "    pm.expect(jsonData.detail).to.be.a('string').and.not.empty;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/clubs/999",
+          "host": ["{{base_url}}"],
+          "path": ["api", "clubs", "999"]
+        }
+      }
+    },
+    {
+      "name": "5. Один клуб - невалидный ID 422 (GET /api/clubs/abc)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 422 Unprocessable Entity на строковый ID', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "pm.test('Присутствует описание ошибки валидации', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('detail');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/clubs/abc",
+          "host": ["{{base_url}}"],
+          "path": ["api", "clubs", "abc"]
+        }
+      }
+    },
+    {
+      "name": "6. Список аудиторий (GET /api/rooms)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('У каждой аудитории есть поля id, name, building, capacity', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array').and.not.empty;",
+              "    jsonData.forEach(function(room) {",
+              "        pm.expect(room).to.have.all.keys('id', 'name', 'building', 'capacity');",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/rooms",
+          "host": ["{{base_url}}"],
+          "path": ["api", "rooms"]
+        }
+      }
+    }
+  ]
+}
