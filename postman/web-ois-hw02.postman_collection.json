@@ -1,0 +1,251 @@
+{
+  "info": {
+    "name": "WEB-ОИС API (HW-02)",
+    "description": "Автотесты ко второй домашней работе",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "created_club_id",
+      "value": "0",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. POST /api/clubs - Успешное создание (201) с триммингом пробелов",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Пробелы по краям обрезаны', function () {",
+              "    pm.expect(data.name).to.eql('Клуб робототехники');",
+              "});",
+              "pm.test('Присвоен корректный ID > 3', function () {",
+              "    pm.expect(data.id).to.be.above(3);",
+              "});",
+              "pm.collectionVariables.set('created_club_id', data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"   Клуб робототехники   \"\n}"
+        },
+        "url": {"raw": "{{base_url}}/api/clubs", "host": ["{{base_url}}"], "path": ["api", "clubs"]}
+      }
+    },
+    {
+      "name": "2. POST /api/clubs - Дубликат названия регистронезависимо (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 409 Conflict', function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"клуб РОБОТОТЕХНИКИ\"\n}"
+        },
+        "url": {"raw": "{{base_url}}/api/clubs", "host": ["{{base_url}}"], "path": ["api", "clubs"]}
+      }
+    },
+    {
+      "name": "3. POST /api/clubs - Слишком короткое название (422)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 422 Unprocessable Content', function () {",
+              "    pm.response.to.have.status(422);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"   A   \"\n}"
+        },
+        "url": {"raw": "{{base_url}}/api/clubs", "host": ["{{base_url}}"], "path": ["api", "clubs"]}
+      }
+    },
+    {
+      "name": "4. PATCH /api/clubs/{id} - Успешное переименование (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Имя обновилось', function () {",
+              "    pm.expect(data.name).to.eql('AI Лаборатория');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"   AI Лаборатория   \"\n}"
+        },
+        "url": {"raw": "{{base_url}}/api/clubs/{{created_club_id}}", "host": ["{{base_url}}"], "path": ["api", "clubs", "{{created_club_id}}"]}
+      }
+    },
+    {
+      "name": "5. DELETE /api/clubs/1 - Запрет удаления клуба с мероприятиями (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 409 Conflict', function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.test('Содержит количество мероприятий в detail', function () {",
+              "    pm.expect(data.detail).to.include('1');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {"raw": "{{base_url}}/api/clubs/1", "host": ["{{base_url}}"], "path": ["api", "clubs", "1"]}
+      }
+    },
+    {
+      "name": "6. DELETE /api/clubs/{id} - Успешное удаление пустого клуба (204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 204 No Content', function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {"raw": "{{base_url}}/api/clubs/{{created_club_id}}", "host": ["{{base_url}}"], "path": ["api", "clubs", "{{created_club_id}}"]}
+      }
+    },
+    {
+      "name": "7. GET /api/events?room_id=1 - Фильтр по аудитории",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.expect(data.items.length).to.be.at.least(1);",
+              "data.items.forEach(function(e) {",
+              "    pm.expect(e.room_id).to.eql(1);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{base_url}}/api/events?room_id=1", "host": ["{{base_url}}"], "path": ["api", "events"], "query": [{"key": "room_id", "value": "1"}]}
+      }
+    },
+    {
+      "name": "8. GET /api/events?q=поиск - Поиск по названию",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var data = pm.response.json();",
+              "pm.expect(data.items.length).to.be.at.least(1);",
+              "pm.expect(data.total).to.be.at.least(1);",
+              "pm.expect(data.items[0].title.toLowerCase()).to.include('поиск');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{base_url}}/api/events?q=поиск", "host": ["{{base_url}}"], "path": ["api", "events"], "query": [{"key": "q", "value": "поиск"}]}
+      }
+    },
+    {
+      "name": "9. GET /api/events?q=а - Запрос поиска короче 2 символов (422)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 422 Unprocessable Content', function () {",
+              "    pm.response.to.have.status(422);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {"raw": "{{base_url}}/api/events?q=а", "host": ["{{base_url}}"], "path": ["api", "events"], "query": [{"key": "q", "value": "а"}]}
+      }
+    }
+  ]
+}

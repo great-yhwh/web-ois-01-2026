@@ -48,20 +48,35 @@ def check_business_rules(data: dict, event_id: int | None = None) -> None:
 
 @router.get("", response_model=EventPage, summary="Список мероприятий")
 def list_events(
-    club_id: Annotated[int | None, Query(description="Только мероприятия этого клуба")] = None,
-    date_from: Annotated[date | None, Query(description="Начиная с даты, включительно")] = None,
-    date_to: Annotated[date | None, Query(description="По дату, включительно")] = None,
-    page: Annotated[int, Query(ge=1, description="Номер страницы")] = 1,
-    size: Annotated[int, Query(ge=1, le=100, description="Мероприятий на странице")] = 20,
+        club_id: Annotated[int | None, Query(description="Только мероприятия этого клуба")] = None,
+        room_id: Annotated[int | None, Query(description="Только мероприятия в этой аудитории")] = None,
+        q: Annotated[
+            str | None,
+            Query(
+                min_length=2,
+                max_length=50,
+                description="Поиск по подстроке в названии мероприятия без учёта регистра (длина от 2 до 50 символов)",
+            ),
+        ] = None,
+        date_from: Annotated[date | None, Query(description="Начиная с даты, включительно")] = None,
+        date_to: Annotated[date | None, Query(description="По дату, включительно")] = None,
+        page: Annotated[int, Query(ge=1, description="Номер страницы")] = 1,
+        size: Annotated[int, Query(ge=1, le=100, description="Мероприятий на странице")] = 20,
 ):
-    """Мероприятия по возрастанию времени начала. Фильтры можно сочетать."""
+    """Мероприятия по возрастанию времени начала. Фильтры можно сочетать между собой."""
     events = sorted(storage.EVENTS.values(), key=lambda e: e["starts_at"])
+
     if club_id is not None:
         events = [e for e in events if e["club_id"] == club_id]
+    if room_id is not None:
+        events = [e for e in events if e["room_id"] == room_id]
     if date_from is not None:
         events = [e for e in events if e["starts_at"].date() >= date_from]
     if date_to is not None:
         events = [e for e in events if e["starts_at"].date() <= date_to]
+    if q is not None:
+        q_lower = q.lower()
+        events = [e for e in events if q_lower in e["title"].lower()]
 
     start = (page - 1) * size
     return {"items": events[start : start + size], "total": len(events), "page": page, "size": size}

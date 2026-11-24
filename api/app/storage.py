@@ -43,8 +43,13 @@ EVENTS = {
     },
 }
 
-_event_ids = count(start=len(EVENTS) + 1)
+_event_ids = count(start=max(EVENTS.keys(), default=0) + 1)
+_club_ids = count(start=max(CLUBS.keys(), default=0) + 1)
 
 
 def next_event_id() -> int:
     return next(_event_ids)
+
+
+def next_club_id() -> int:
+    return next(_club_ids)
